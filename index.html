@@ -1166,7 +1166,7 @@
             border: 1px solid rgba(255, 77, 77, 0.3);
         }
 
-        .btn-copy-link {
+        .btn-copy-link, .btn-confirm-wa {
             padding: 7px 14px;
             border-radius: 10px;
             font-size: 0.75rem;
@@ -1181,6 +1181,17 @@
             gap: 6px;
             transition: all 0.3s;
             box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        .btn-confirm-wa {
+            background: var(--warning-color);
+            color: #000;
+            box-shadow: 0 0 12px rgba(255, 149, 0, 0.3);
+        }
+
+        .btn-confirm-wa:hover {
+            box-shadow: 0 0 20px var(--warning-color);
+            transform: translateY(-1px);
         }
 
         .btn-copy-link:hover {
@@ -1798,6 +1809,20 @@
 
                 <div class="settings-card">
                     <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        Kontak & Bantuan Admin
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+                        Butuh bantuan seputar transaksi atau kendala layanan? Hubungi admin melalui WhatsApp di bawah ini:
+                    </p>
+                    <a href="https://wa.me/6285658327362" target="_blank" class="btn-confirm-wa" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                        Hubungi WhatsApp Admin (+62 856-5832-7362)
+                    </a>
+                </div>
+
+                <div class="settings-card">
+                    <h3>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                         Alamat Email Akun
                     </h3>
@@ -1982,7 +2007,12 @@
                         else if (status === 'Gagal') badgeClass = 'failed';
 
                         let actionHtml = '';
-                        if (tx.category === 'sosmed') {
+                        if (status === 'Menunggu Pembayaran') {
+                            const descEncoded = encodeURIComponent(tx.description || '');
+                            const amountFormatted = Number(tx.amount || 0).toLocaleString('id-ID');
+                            const emailUser = user.email;
+                            actionHtml = `<button class="btn-confirm-wa" onclick="reconfirmPayment('${descEncoded}', '${amountFormatted}', '${emailUser}')">Konfirmasi WA</button>`;
+                        } else if (tx.category === 'sosmed') {
                             if (status === 'Proses') actionHtml = `<span style="font-size: 0.78rem; color: var(--process-color); font-weight: 600;">Sedang Dikerjakan</span>`;
                             else if (status === 'Berhasil') actionHtml = `<span style="font-size: 0.78rem; color: var(--success-color); font-weight: 600;">Selesai</span>`;
                             else if (status === 'Gagal') actionHtml = `<span style="font-size: 0.78rem; color: var(--danger-color); font-weight: 600;">Dibatalkan</span>`;
@@ -2020,6 +2050,13 @@
                 console.error("Gagal mengambil data:", error);
             }
         }
+
+        window.reconfirmPayment = function(titleEncoded, priceFormatted, emailUser) {
+            const title = decodeURIComponent(titleEncoded);
+            const adminWA = "6285658327362";
+            const msg = `Halo Admin ByAlhatip,%0A%0ASaya ingin konfirmasi ulang pembayaran QRIS untuk pesanan:%0A- *Produk/Layanan:* ${title}%0A- *Total:* Rp ${priceFormatted}%0A- *Email:* ${emailUser}%0A%0AMohon verifikasi pembayaran saya, terima kasih!`;
+            window.open(`https://wa.me/${adminWA}?text=${msg}`, '_blank');
+        };
 
         window.triggerCopyModal = function(fileName, url) {
             document.getElementById('confirm-file-name').textContent = fileName;
